@@ -8611,7 +8611,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "D-Link Camera",
+  name = "D-Link DCS (var.1)",
   cpe = "cpe:/h:d-link:dcs-*",
   category = "security",
   paths = {
@@ -8626,6 +8626,33 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "D-Link DCS (var.2)",
+  cpe = "cpe:/h:d-link:dcs-*",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local lurl = "eng/liveView.cgi"
+    if not (response.status == 200
+           and response.body
+           and response.body:find(lurl, 1, true)) then
+      return false
+    end
+    local resp = http_get_simple(host, port, lurl)
+    return (http_auth_realm(resp) or ""):find("^DCS%-%d+%u?%f[_\0]")
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"},
+    {username = "admin", password = ""}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, url.absolute(path, "eng/liveView.cgi"),
+                        user, pass, "any")
   end
 })
 
