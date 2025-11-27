@@ -12773,7 +12773,8 @@ table.insert(fingerprints, {
     return response.status == 200
            and response.body
            and response.body:find("NAS4Free", 1, true)
-           and response.body:find("?channels=#nas4free", 1, true)
+           and get_tag(response.body, "a", {href="%?channels=#nas4free$"})
+           and get_tag(response.body, "form", {action="^login%.php$"})
   end,
   login_combos = {
     {username = "admin", password = "nas4free"}
