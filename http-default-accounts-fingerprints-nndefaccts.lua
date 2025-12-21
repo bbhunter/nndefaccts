@@ -12613,6 +12613,33 @@ table.insert(fingerprints, {
   end
 })
 
+table.insert(fingerprints, {
+  name = "Intermec EasyLAN 10i2",
+  category = "printer",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("EasyLAN Web", 1, true)
+           and get_tag(response.body, "input", {name="^ZZ_pwd$"})
+  end,
+  login_combos = {
+    {username = "", password = "intermec"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port, url.absolute(path, "home"),
+                                 nil, {ZZ_pwd=pass})
+    if not (resp.status == 200
+           and get_tag(resp.body or "", "a", {href="/loadroot$"})) then
+      return false
+    end
+    http_get_simple(host, port, url.absolute(path, "loadroot"))
+    return true
+  end
+})
+
 ---
 --Storage
 ---
