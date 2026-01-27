@@ -8002,7 +8002,24 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Speco IP Camera",
+  name = "Speco IP Camera (var.1)",
+  category = "security",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return http_auth_realm(response) == "SuperNova"
+  end,
+  login_combos = {
+    {username = "admin", password = "1234"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Speco IP Camera (var.2)",
   category = "security",
   paths = {
     {path = "/"}
