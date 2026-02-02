@@ -32,7 +32,7 @@ provide generic feedback, etc., please see instructions posted at
 <https://github.com/nnposter/nndefaccts/blob/master/README.md>.
 ]]
 
--- luacheck: std lua53, new globals fingerprints
+-- luacheck: std lua54, new globals fingerprints
 -- luacheck: ignore 212/host 212/port 212/path 212/user 212/pass
 -- luacheck: no max line length
 
@@ -2771,6 +2771,53 @@ table.insert(fingerprints, {
   },
   login_check = function (host, port, path, user, pass)
     return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Linksys RE7000",
+  category = "routers",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return have_openssl
+           and response.status == 200
+           and response.body
+           and response.body:find("/bbs/", 1, true)
+           and get_tag(response.body, "form", {action="/goform/langSwitch$"})
+  end,
+  login_combos = {
+    {username = "", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp1 = http_get_simple(host, port, url.absolute(path, "login.shtml"))
+    if not (resp1.status == 200 and resp1.body) then return false end
+    local index = "1"
+    if resp1.body:find("%f[%w]encrypt_word *%([^\r\n]*, *\"1\" *%) *;") then
+      index = "2"
+    end
+    local resp2 = http_get_simple(host, port, url.absolute(path, "bbs/js/main.js"))
+    if not (resp2.status == 200 and resp2.body) then return false end
+    local encfunc = resp2.body:match("%f[%w]encrypt_word%s*%((.-)zerostr")
+    if not encfunc then return false end
+    local n = encfunc:match("%svar%s+N" .. index .. "%s*=%s*\"(%d+)\"%s*;")
+    local p = encfunc:match("%svar%s+P" .. index .. "%s*=%s*\"(%d+)\"%s*;")
+    if n and p then
+      p = openssl.bignum_dec2bn(p)
+      n = openssl.bignum_dec2bn(n)
+      local encpass = {}
+      for _, b in ipairs({pass:byte(1, -1)}) do
+        local c = openssl.bignum_bn2dec(openssl.bignum_mod_exp(openssl.bignum_dec2bn(b), p, n))
+        table.insert(encpass, ("%08d"):format(tonumber(c)))
+      end
+      pass = table.concat(encpass)
+    end
+    local resp3 = http_post_simple(host, port,
+                                  url.absolute(path, "goform/webLogin"),
+                                  nil, {password=pass})
+    return resp3.status == 301
+           and (resp3.header["location"] or ""):find("/wireless/wireless_basic%.shtml$")
   end
 })
 
