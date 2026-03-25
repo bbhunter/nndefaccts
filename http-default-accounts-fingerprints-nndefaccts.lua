@@ -909,7 +909,7 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
-  name = "Grafana",
+  name = "Grafana (var.1)",
   category = "web",
   paths = {
     {path = "/"}
@@ -928,6 +928,42 @@ table.insert(fingerprints, {
     local resp = http_post_simple(host, port, url.absolute(path, "login"),
                                  {header=header}, json.generate(jin))
     return resp.status == 200 and get_cookie(resp, "grafana_user") == user
+  end
+})
+
+table.insert(fingerprints, {
+  name = "Grafana (var.2)",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    local loc = (response.header["location"] or ""):gsub("^https?://[^/]*", "")
+    if not (response.status == 302 and loc:find("/login%f[?\0]")) then
+      return false
+    end
+    if get_cookie(response, "grafana_sess") then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, loc))
+    return resp.status == 200
+           and resp.body
+           and resp.body:find("Grafana", 1, true)
+           and resp.body:lower():find("<title>grafana</title>", 1, true)
+           and get_tag(resp.body, "body", {class="%f[^%s\0]app%-grafana%f[%s\0]"})
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json;charset=utf-8"}
+    local jin = {user=user, password=pass}
+    json.make_object(jin)
+    local resp = http_post_simple(host, port, url.absolute(path, "login"),
+                                 {header=header}, json.generate(jin))
+    return resp.status == 200
+           and get_cookie(resp, "grafana_session", "^%x+$")
   end
 })
 
