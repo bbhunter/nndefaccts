@@ -2148,6 +2148,32 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "SonarQube",
+  cpe = "cpe:/a:sonarsource:sonarqube",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("SonarQube", 1, true)
+           and get_tag(response.body, "meta", {content="^SonarQube$"})
+           and get_tag(response.body, "link", {href="/css/sonar%.%x+%.css$"})
+  end,
+  login_combos = {
+    {username = "admin",  password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local resp = http_post_simple(host, port,
+                                 url.absolute(path, "api/authentication/login"),
+                                 nil, {login=user, password=pass})
+    return resp.status == 200
+           and get_cookie(resp, "JWT-SESSION", "^ey[^.]+%.ey[^.]+%.")
+  end
+})
+
+table.insert(fingerprints, {
   name = "BeEF",
   category = "web",
   paths = {
