@@ -10462,6 +10462,39 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "ABB FLXeon",
+  cpe = "cpe:/o:abb:*",
+  category = "industrial",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 200
+           and response.body
+           and response.body:find("<app-root>", 1, true)
+           and response.body:find("main", 1, true)
+           and get_tag(response.body, "script", {src="^main[-.]"})
+  end,
+  login_combos = {
+    {username = "admin", password = "cylonctl"},
+    {username = "cxpro", password = "siteguide"}
+  },
+  login_check = function (host, port, path, user, pass)
+    local header = {["Accept"]="application/json, text/plain, */*",
+                    ["Content-Type"]="application/json"}
+    local jin = {username=user, password=pass}
+    json.make_object(jin)
+    local resp = http_post_simple(host, port, url.absolute(path, "api/login"),
+                                 {header=header}, json.generate(jin))
+    if not (resp.status == 200 and get_cookie(resp, "user_sid", "^s%%3A")) then
+      return false
+    end
+    local jstatus, jout = json.parse(resp.body)
+    return jstatus and jout.id == user
+  end
+})
+
+table.insert(fingerprints, {
   name = "ScadaBR",
   category = "industrial",
   paths = {
