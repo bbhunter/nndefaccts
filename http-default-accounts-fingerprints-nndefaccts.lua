@@ -33,7 +33,7 @@ provide generic feedback, etc., please see instructions posted at
 ]]
 
 -- luacheck: std lua54, new globals fingerprints
--- luacheck: ignore 212/host 212/port 212/path 212/user 212/pass
+-- luacheck: ignore 212/host 212/port 212/path
 -- luacheck: no max line length
 
 local base64 = require "base64"
@@ -2855,7 +2855,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "admin"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp1 = http_get_simple(host, port, url.absolute(path, "login.shtml"))
     if not (resp1.status == 200 and resp1.body) then return false end
     local index = "1"
@@ -3248,7 +3248,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "airlive"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "goform/asp_login"),
                                  nil, {psw=pass})
@@ -3482,7 +3482,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "cgi-bin/login.exe"), nil,
                                  {totalMSec = stdnse.clock_ms()/1000,
@@ -3507,7 +3507,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {page="",
                   logout="",
                   action="submit",
@@ -3943,7 +3943,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "admin"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp1 = http_get_simple(host, port, path)
     if not (resp1.status == 200 and resp1.body) then return false end
     local img = get_tag(resp1.body, "img", {title="^spacer$", src="^data:"})
@@ -4639,7 +4639,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "admin"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port,
                                  url.absolute(path, "cgi-bin/admin?page=x"),
                                  nil, {AdminPassword=pass,next=10,page="x"})
@@ -4789,7 +4789,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "password"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "login.cgi"),
                                  nil, {password=pass})
     return resp.status == 200 and get_cookie(resp, "GS108SID", ".")
@@ -4812,7 +4812,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "password"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp1 = http_get_simple(host, port, path)
     if not (resp1.status == 200 and resp1.body) then return false end
     local lurl = resp1.body:match("['\"]([^'\"]-/base/%w+_login%.html)")
@@ -4897,7 +4897,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "admin"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {password=pass,
                   x=0,
                   y=0}
@@ -5095,7 +5095,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "1234"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {LoginPassword="ZyXEL ZyWALL Series",
                   hiddenPassword=stdnse.tohex(openssl.md5(pass)),
                   Prestige_Login="Login"}
@@ -5227,7 +5227,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "admin"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {form_submission_type="login",
                   form_submission_parameter="",
                   current_page="welcome_login.html",
@@ -5690,7 +5690,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, _pass)
     return true
   end
 })
@@ -6143,7 +6143,7 @@ table.insert(fingerprints, {
     {username = "", password = "0000"},
     {username = "", password = "111111"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form1 = stdnse.output_table()
     form1.infield5 = 1
     form1.infield6 = pass
@@ -7041,7 +7041,7 @@ table.insert(fingerprints, {
     {username = "", password = "admin"},
     {username = "", password = "123"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "dologin"),
                                  nil, {P2=pass,Login="Login",gnkey="0b82"})
     return resp.status == 200 and get_cookie(resp, "session_id", "^%x+$")
@@ -7477,7 +7477,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "123456"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {page_submit="WEBMp_Admin_Login",
                   lang="en",
                   AdminPassword=pass}
@@ -7722,7 +7722,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "root", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, user, _pass)
     local resp = http_get_simple(host, port,
                                 url.absolute(path, "pwdroot/pwdRoot.shtml"))
     return resp.status == 200
@@ -7836,7 +7836,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, _pass)
     return true
   end
 })
@@ -8456,7 +8456,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, _pass)
     return true
   end
 })
@@ -8642,7 +8642,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, _pass)
     return true
   end
 })
@@ -10685,7 +10685,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "system"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp0 = http_get_simple(host, port, path)
     if not (resp0.status == 200 and resp0.body) then return false end
     local lurl = get_tag(resp0.body, "frame", {src="^summary%.html$"})
@@ -10816,7 +10816,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username="", password="ACCESS"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {access="",
                   password="",
                   language=0,
@@ -11843,7 +11843,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "sma"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local form = {Language="en",
                   Password=pass,
                   ButtonLogin="Login"}
@@ -11929,7 +11929,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "hawkip"},
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local opts = {scheme = "http", timeout = 10000}
     local logouturl = url.absolute(path, "out_security.cgi?A=0")
     http_get_simple(host, port, logouturl, opts)
@@ -12288,7 +12288,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = ""}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, _pass)
     local resp = http_get_simple(host, port,
                                 url.absolute(path, "Maintenance/security.htm"))
     return resp.status == 200
@@ -12766,7 +12766,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "1234"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "authorize"),
                                  nil, {["0"]=pass})
     return resp.status == 200
@@ -12814,7 +12814,7 @@ table.insert(fingerprints, {
     {username = "Administrator", password = ""},
     {username = "Administrator", password = "Fiery.1"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local sessionid = host.ip
                       .. "_"
                       .. math.floor(stdnse.clock_ms())
@@ -12902,7 +12902,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "intermec"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "home"),
                                  nil, {ZZ_pwd=pass})
     if not (resp.status == 200
@@ -13555,7 +13555,7 @@ table.insert(fingerprints, {
   login_combos = {
     {username = "", password = "Administrator"}
   },
-  login_check = function (host, port, path, user, pass)
+  login_check = function (host, port, path, _user, pass)
     local resp = http_post_simple(host, port, url.absolute(path, "cgi-bin/login"),
                                  nil, {password_value=pass, idle_timeout=60})
     return resp.status == 302 and get_cookie(resp, "session_id", "^%x+$")
