@@ -1126,6 +1126,26 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "OpenSearch (basic auth)",
+  category = "web",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    return response.status == 401
+           and http_auth_realm(response) == "OpenSearch Security"
+           and response.header["www-authenticate"]:find("^%s*Basic%s")
+  end,
+  login_combos = {
+    {username = "admin",        password = "admin"},
+    {username = "kibanaserver", password = "kibanaserver"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Sambar Server",
   cpe = "cpe:/a:sambar:sambar_server",
   category = "web",
