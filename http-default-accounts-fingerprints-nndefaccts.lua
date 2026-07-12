@@ -7387,6 +7387,30 @@ table.insert(fingerprints, {
 })
 
 table.insert(fingerprints, {
+  name = "Syn-Apps Paging Relay",
+  category = "voip",
+  paths = {
+    {path = "/"}
+  },
+  target_check = function (host, port, path, response)
+    if not (response.status == 401
+           and (response.header["server"] or ""):find("^Boa/%d+%.")
+           and response.body
+           and response.body:lower():find("<title>%s*401 unauthorized%s*</title>")) then
+      return false
+    end
+    local resp = http_get_simple(host, port, url.absolute(path, "cgi-bin/audioconfig.cgi"))
+    return resp.status == 401
+  end,
+  login_combos = {
+    {username = "admin", password = "admin"}
+  },
+  login_check = function (host, port, path, user, pass)
+    return try_http_auth(host, port, path, user, pass, false)
+  end
+})
+
+table.insert(fingerprints, {
   name = "Teles Gateway",
   category = "voip",
   paths = {
