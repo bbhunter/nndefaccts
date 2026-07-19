@@ -172,9 +172,7 @@ end
 -- @return A response table (see library http.lua for description)
 ---
 local function http_post_multipart (host, port, path, options, postdata)
-  local boundary = ("-"):rep(20)
-                   .. math.random(1000000, 9999999)
-                   .. math.random(1000000, 9999999)
+  local boundary = ("-"):rep(20) .. random_hex(16)
   local opts = tableaux.tcopy(options or {})
   opts.header = opts.header or {}
   opts.header["Content-Type"] = "multipart/form-data; boundary=" .. boundary
